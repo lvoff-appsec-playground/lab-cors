@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./services/api
+    environment:
+      - SCENARIO=${SCENARIO:-lab1_reflect_basic_origin}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE:-None}
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-api.local}
+      - COOKIE_PATH=${COOKIE_PATH:-/}
+    expose:
+      - "8000"
+
+  attacker:
+    build: ./services/attacker
+    expose:
+      - "8000"
+
+  trusted_http:
+    build: ./services/trusted_http
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api
+      - attacker
+      - trusted_http
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+

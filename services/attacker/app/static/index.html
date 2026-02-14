@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORS Lab Attacker</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    button { margin-right: 12px; padding: 8px 12px; }
+    pre { background: #f4f4f4; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Attacker Lab</h1>
+  <p>Use these buttons to trigger the victim flow.</p>
+  <div>
+    <button id="open-login">Open victim login</button>
+    <button id="exploit">Exploit /me</button>
+  </div>
+  <h2>Result</h2>
+  <pre id="output">(no output yet)</pre>
+
+  <script src="/static/exploit.js"></script>
+</body>
+</html>

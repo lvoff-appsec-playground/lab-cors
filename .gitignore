@@ -15,7 +15,7 @@ venv/
 .venv/
 
 # Environment files
-.env
+#.env
 .env.*
 
 # IDEs
@@ -29,5 +29,10 @@ Thumbs.db
 # Logs
 *.log
 
+# Local TLS certs
+nginx/certs/*
+!nginx/certs/.gitkeep
+
 # project development docs
 docs/
+#development_docs/

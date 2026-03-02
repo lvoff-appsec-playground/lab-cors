@@ -37,6 +37,22 @@ LAB1_REFLECT_BASIC_ORIGIN = CorsScenario(
     max_age=0,
 )
 
+LAB2_TRUSTED_NULL_ORIGIN = CorsScenario(
+    name="lab2_trusted_null_origin",
+    description="Allows Origin: null with credentials; no reflection for others.",
+    reflect_origin=False,
+    allow_null_origin=True,
+    allow_credentials=True,
+    allowlist_exact=None,
+    allowlist_regex=None,
+    allow_subdomains=False,
+    set_vary_origin=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key"],
+    max_age=0,
+)
+
 SCENARIOS = {
     LAB1_REFLECT_BASIC_ORIGIN.name: LAB1_REFLECT_BASIC_ORIGIN,
+    LAB2_TRUSTED_NULL_ORIGIN.name: LAB2_TRUSTED_NULL_ORIGIN,
 }

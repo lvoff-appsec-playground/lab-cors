@@ -20,16 +20,19 @@ async def request_logging_middleware(request: Request, call_next: Callable) -> R
     origin = request.headers.get("origin")
     has_cookie = "cookie" in request.headers
     preflight = _is_preflight(request)
+    preflight_method = request.headers.get("access-control-request-method")
     preflight_headers = request.headers.get("access-control-request-headers")
 
     response = await call_next(request)
 
     log_entry = {
+        "event": "preflight" if preflight else "request",
         "origin": origin,
         "method": request.method,
         "path": request.url.path,
         "has_cookie": has_cookie,
         "preflight": preflight,
+        "preflight_method": preflight_method,
         "preflight_headers": preflight_headers,
         "cors_allow_origin": response.headers.get("access-control-allow-origin"),
         "cors_allow_credentials": response.headers.get("access-control-allow-credentials"),

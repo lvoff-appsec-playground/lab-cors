@@ -1,4 +1,6 @@
+# WARNING
 # This is intentionally vulnerable and must never be used in production.
+# WARNING
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -165,7 +167,8 @@ async def transfer_legacy(request: Request) -> JSONResponse:
 # and read the victim's transfer history.
 #
 # This endpoint models a common real-world API mistake:
-#   Sensitive data exposed via GET + cookie-based auth + permissive CORS.
+#   Sensitive data exposed via GET + cookie-based auth + permissive CORS
+#   (Access-Control-Allow-Origin and Access-Control-Allow-Credentials usage)
 
 @router.get("/transfers")
 async def list_transfers(request: Request) -> JSONResponse:

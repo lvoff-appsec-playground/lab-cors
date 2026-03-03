@@ -1,3 +1,14 @@
+# WARNING
+# This is intentionally vulnerable and must never be used in production.
+# WARNING
+
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
+
+router = APIRouter()
+
+
+
 # Educational purpose:
 # --------------------
 # This endpoint is intentionally designed as an "API-style" state-changing endpoint.
@@ -18,13 +29,6 @@
 #   - How Access-Control-Allow-Headers and Allow-Methods affect execution
 #   - The difference between "request sent" and "response readable"
 #   - Why CORS misconfiguration can allow cross-origin API abuse
-
-
-from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
-
-router = APIRouter()
-
 
 @router.post("/notes")
 async def notes(request: Request) -> JSONResponse:

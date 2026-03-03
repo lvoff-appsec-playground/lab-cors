@@ -2,10 +2,14 @@
 # This is intentionally vulnerable and must never be used in production.
 # WARNING
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Header, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from ..db.transfer_db import list_transfers_by_user, record_transfer
+from ..db.transfer_db import (
+    latest_transfer_id_by_user,
+    list_transfers_by_user,
+    record_transfer,
+)
 
 router = APIRouter()
 
@@ -171,10 +175,55 @@ async def transfer_legacy(request: Request) -> JSONResponse:
 #   (Access-Control-Allow-Origin and Access-Control-Allow-Credentials usage)
 
 @router.get("/transfers")
-async def list_transfers(request: Request) -> JSONResponse:
+async def list_transfers(request: Request, x_client_version: str | None = Header(None)) -> JSONResponse:
+    # Force preflight request
+    # since it's a non-simple request (uses custom headers)
+    # Option 1
+    if x_client_version != "1":
+        return JSONResponse({"error": "missing_ajax_header_or_api_key"}, status_code=400)
+    # Option 2
+    has_api_key = "x-api-key" in request.headers
+    has_requested_with = "x-requested-with" in request.headers
+    if not (has_api_key or has_requested_with):
+        return JSONResponse({"error": "missing_ajax_header_or_api_key"}, status_code=400)
+
     sid = request.cookies.get("sid")
     if not sid:
         return JSONResponse({"transfers": []})
 
     transfers = list_transfers_by_user(sid)
     return JSONResponse({"transfers": transfers})
+
+
+
+# Educational purpose:
+# --------------------
+# /account-meta demonstrates an advanced CORS nuance:
+# "response headers are NOT automatically readable by cross-origin JavaScript."
+#
+# This endpoint intentionally leaks sensitive metadata via custom response headers
+# (e.g., X-Account-Tier, X-Last-Transfer-Id).
+#
+# This endpoint allows the lab to demonstrate:
+#   - Even if CORS allows reading the response body, browsers only expose a small
+#     set of "simple response headers" to JS by default.
+#   - To allow JS to read custom headers cross-origin, the server must explicitly set:
+#       Access-Control-Expose-Headers: X-Account-Tier, X-Last-Transfer-Id
+#
+# This lab allows you to compare:
+#   - CORS misconfig that allows reading BODY (classic)
+#   - CORS misconfig that additionally exposes sensitive HEADERS (advanced)
+
+@router.get("/account-meta")
+async def account_meta(request: Request) -> JSONResponse:
+    sid = request.cookies.get("sid")
+    if not sid:
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+
+    last_transfer_id = latest_transfer_id_by_user(sid)
+    headers = {
+        "X-Account-Tier": "gold" if sid == "user1" else "free",
+        "X-Last-Transfer-Id": "" if last_transfer_id is None else str(last_transfer_id),
+        "X-Internal-User-Id": sid,
+    }
+    return JSONResponse({"status": "ok"}, headers=headers)

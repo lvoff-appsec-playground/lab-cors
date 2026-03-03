@@ -33,3 +33,15 @@ def list_transfers_by_user(user_from: str) -> list[dict]:
             }
             for row in cursor.fetchall()
         ]
+
+
+def latest_transfer_id_by_user(user_from: str) -> Optional[int]:
+    with _get_conn() as conn:
+        cursor = conn.execute(
+            "SELECT id FROM transfers WHERE user_from = ? ORDER BY id DESC LIMIT 1",
+            (user_from,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return row[0]

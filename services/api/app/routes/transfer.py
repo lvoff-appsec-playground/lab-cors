@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from ..db.transfer_db import record_transfer
+from ..db.transfer_db import list_transfers_by_user, record_transfer
 
 router = APIRouter()
 
@@ -74,7 +74,7 @@ async def transfer(request: Request) -> JSONResponse:
     if not to or not amount:
         return JSONResponse({"error": "invalid_transfer"}, status_code=400)
 
-    transfer_id = record_transfer(user_from="user1", user_to=str(to), amount=str(amount))
+    transfer_id = record_transfer(user_from=sid, user_to=str(to), amount=str(amount))
 
     return JSONResponse({
         "status": "transfer_completed",
@@ -90,7 +90,7 @@ async def transfer(request: Request) -> JSONResponse:
 # This endpoint intentionally implements a state-changing action using GET,
 # which is a deliberately insecure and outdated design pattern.
 #
-# Why?
+# Why?:
 #   1) To demonstrate why state-changing operations must never use GET.
 #      GET requests are automatically triggered by:
 #         - <img>
@@ -124,7 +124,7 @@ async def transfer_legacy(request: Request) -> JSONResponse:
     if not to or not amount:
         return JSONResponse({"error": "invalid_transfer"}, status_code=400)
 
-    transfer_id = record_transfer(user_from="user1", user_to=str(to), amount=str(amount))
+    transfer_id = record_transfer(user_from=sid, user_to=str(to), amount=str(amount))
 
     return JSONResponse({
         "status": "transfer_completed",
@@ -132,3 +132,46 @@ async def transfer_legacy(request: Request) -> JSONResponse:
         "to": to,
         "amount": amount
     })
+
+
+
+# Educational purpose:
+# --------------------
+# This endpoint returns all transfers associated with the currently
+# authenticated user (based on the "sid" cookie).
+#
+# Behavior:
+#   1) If a valid "sid" cookie is present:
+#        → return only transfers where user_from == sid
+#   2) If no "sid" cookie is present:
+#        → return an empty list
+#
+# Why?:
+#   This endpoint is intentionally designed to demonstrate how
+#   sensitive data can be exposed via a simple GET request when:
+#       - Cookies are automatically included (credentials: include)
+#       - SameSite allows cross-site cookie sending
+#       - CORS is misconfigured (e.g., origin reflection + credentials)
+#
+# This endpoint allows the lab to demonstrate:
+#   - Show that GET endpoints can leak sensitive information
+#   - Demonstrate that CORS controls *read access*, not request execution
+#   - Highlight that credentialed cross-origin requests can expose private data
+#   - Reinforce the difference between:
+#         "Request sent" vs "Response readable"
+#
+# In a vulnerable CORS configuration, an attacker page can:
+#   fetch("http://api.local/transfers", { credentials: "include" })
+# and read the victim's transfer history.
+#
+# This endpoint models a common real-world API mistake:
+#   Sensitive data exposed via GET + cookie-based auth + permissive CORS.
+
+@router.get("/transfers")
+async def list_transfers(request: Request) -> JSONResponse:
+    sid = request.cookies.get("sid")
+    if not sid:
+        return JSONResponse({"transfers": []})
+
+    transfers = list_transfers_by_user(sid)
+    return JSONResponse({"transfers": transfers})

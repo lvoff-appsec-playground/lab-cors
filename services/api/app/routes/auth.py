@@ -12,5 +12,5 @@ async def login() -> JSONResponse:
     settings = load_settings()
     response = JSONResponse({"status": "ok", "user": "demo"})
     cookie_params = build_cookie_params(settings)
-    response.set_cookie("sid", "demo-session", **cookie_params)
+    response.set_cookie("sid", "user1", **cookie_params)
     return response

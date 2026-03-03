@@ -30,21 +30,30 @@ router = APIRouter()
 
 @router.get("/transfer")
 async def transfer_form() -> HTMLResponse:
-    # Educational case: this form auto-submits a cross-origin POST to show
-    # that CORS does not prevent state-changing requests (CSRF-style behavior).
+    # Educational case: this form demonstrates a simple POST that would be
+    # "simple request" eligible. Keep it visible so the user can see the form.
     html = """
     <!doctype html>
     <html lang="en">
       <head>
         <meta charset="utf-8">
-        <title>Auto Transfer</title>
+        <title>Transfer</title>
       </head>
       <body>
-        <form action="http://api.local/transfer" method="POST">
-          <input type="hidden" name="to" value="me">
-          <input type="hidden" name="amount" value="1000">
+        <h1>Transfer</h1>
+        <form action="/transfer" method="POST">
+          <label>
+            To:
+            <input type="text" name="to" value="me">
+          </label>
+          <br>
+          <label>
+            Amount:
+            <input type="text" name="amount" value="1000">
+          </label>
+          <br>
+          <button type="submit">Submit transfer</button>
         </form>
-        <script>document.forms[0].submit()</script>
       </body>
     </html>
     """

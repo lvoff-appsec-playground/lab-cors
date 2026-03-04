@@ -1,3 +1,6 @@
+# WARNING
+# This is intentionally vulnerable and must never be used in production.
+# WARNING
 from dataclasses import dataclass
 from typing import List, Optional, Pattern
 
@@ -33,7 +36,7 @@ LAB1_REFLECT_BASIC_ORIGIN = CorsScenario(
     allow_subdomains=False,
     set_vary_origin=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key"],
+    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key", "X-Client-Version"],
     max_age=0,
 )
 
@@ -48,11 +51,43 @@ LAB2_TRUSTED_NULL_ORIGIN = CorsScenario(
     allow_subdomains=False,
     set_vary_origin=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key"],
+    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key", "X-Client-Version"],
+    max_age=0,
+)
+
+ALLOW_ALL = CorsScenario(
+    name="allow_all",
+    description="Worst-case: reflect any origin, allow null, credentials, and all headers.",
+    reflect_origin=True,
+    allow_null_origin=True,
+    allow_credentials=True,
+    allowlist_exact=None,
+    allowlist_regex=None,
+    allow_subdomains=True,
+    set_vary_origin=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "X-Requested-With", "X-Api-Key", "X-Client-Version"],
+    max_age=0,
+)
+
+HARDENED = CorsScenario(
+    name="hardened",
+    description="Most restrictive: no reflection, no null, no credentials, no origins allowed.",
+    reflect_origin=False,
+    allow_null_origin=False,
+    allow_credentials=False,
+    allowlist_exact=[],
+    allowlist_regex=None,
+    allow_subdomains=False,
+    set_vary_origin=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
     max_age=0,
 )
 
 SCENARIOS = {
     LAB1_REFLECT_BASIC_ORIGIN.name: LAB1_REFLECT_BASIC_ORIGIN,
     LAB2_TRUSTED_NULL_ORIGIN.name: LAB2_TRUSTED_NULL_ORIGIN,
+    ALLOW_ALL.name: ALLOW_ALL,
+    HARDENED.name: HARDENED,
 }

@@ -45,3 +45,24 @@ def latest_transfer_id_by_user(user_from: str) -> Optional[int]:
         if not row:
             return None
         return row[0]
+
+
+def list_all_transfers() -> list[dict]:
+    with _get_conn() as conn:
+        cursor = conn.execute(
+            """
+            SELECT id, user_from, user_to, amount, created_at
+            FROM transfers
+            ORDER BY id DESC
+            """
+        )
+        return [
+            {
+                "id": row[0],
+                "user_from": row[1],
+                "user_to": row[2],
+                "amount": row[3],
+                "created_at": row[4],
+            }
+            for row in cursor.fetchall()
+        ]

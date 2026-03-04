@@ -5,7 +5,7 @@ from .config import Settings
 
 def build_cookie_params(settings: Settings) -> Dict[str, object]:
     return {
-        "httponly": True,
+        "httponly": settings.cookie_httponly,
         "samesite": settings.cookie_samesite,
         "secure": settings.cookie_secure,
         "domain": settings.cookie_domain,

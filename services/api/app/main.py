@@ -7,7 +7,7 @@ from .config import load_settings
 from .cors_engine import apply_cors_headers, build_cors_headers
 from .logging_middleware import request_logging_middleware
 from .scenarios import SCENARIOS, LAB1_REFLECT_BASIC_ORIGIN
-from .routes import auth, me, transfer, notes
+from .routes import auth, me, transfer, notes, admin
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,3 +48,4 @@ app.include_router(auth.router)
 app.include_router(me.router)
 app.include_router(transfer.router)
 app.include_router(notes.router)
+app.include_router(admin.router)

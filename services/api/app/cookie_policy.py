@@ -1,3 +1,6 @@
+# WARNING
+# This is intentionally vulnerable and must never be used in production.
+# WARNING
 from typing import Dict
 
 from .config import Settings

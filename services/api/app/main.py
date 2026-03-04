@@ -1,3 +1,6 @@
+# WARNING
+# This is intentionally vulnerable and must never be used in production.
+# WARNING
 import logging
 
 from fastapi import FastAPI, Request

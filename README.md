@@ -1,7 +1,10 @@
-# Lvoff Sec Labs – CORS Playground (Phase 1)
+# Lvoff Sec Labs – CORS Playground
 
-This repo contains a minimal, local Docker Compose lab for experimenting with CORS misconfigurations.
-Phase 1 implements a basic API with session cookies, a single CORS scenario, and an attacker UI.
+This repo contains a minimal, local Docker Compose lab for experimenting with CORS misconfigurations,
+CSRF vs CORS behavior, and sensitive header exposure.
+
+# WARNING
+(!) This is intentionally vulnerable and must never be used in production.
 
 ## Quick Start
 
@@ -38,15 +41,14 @@ docker compose up --build
 https://attacker.local/
 ```
 
-## Lab 1 Behavior
+## CORS Scenarios
 
-Scenario: `lab1_reflect_basic_origin`
+Available scenarios (set via env or `/admin/config`):
 
-- Reflects any Origin
-- Allows credentials
-- Sets `Vary: Origin`
-- Allows methods: `GET, POST, OPTIONS`
-- Allows headers: `Content-Type, X-Requested-With, X-Api-Key`
+- `lab1_reflect_basic_origin`: reflect any origin, allow credentials
+- `lab2_trusted_null_origin`: allow `Origin: null` with credentials
+- `allow_all`: worst-case configuration (reflect + null + credentials + broad headers)
+- `hardened`: most restrictive (no origins allowed)
 
 ## Notes / Defaults
 
@@ -54,11 +56,34 @@ Scenario: `lab1_reflect_basic_origin`
 - Defaults use `COOKIE_SAMESITE=None` and `COOKIE_SECURE=true` for HTTPS testing.
 - Browsers enforce `SameSite=None` + `Secure`. If cookies are blocked, verify you are using HTTPS and your local CA is trusted.
 - Requests to `http://api.local` redirect to `https://api.local`.
+- `COOKIE_HTTPONLY` is configurable and can be changed at runtime via `/admin/config`.
 
-## Phase 1 Endpoints
+## API Endpoints
 
 - `GET https://api.local/login` sets a dummy session cookie (`sid`)
 - `GET https://api.local/me` returns sensitive JSON only if `sid` is present
+- `POST https://api.local/notes` JSON-only endpoint requiring a custom header (`X-Api-Key` or `X-Requested-With`)
+- `POST https://api.local/transfer` form-friendly state change (simple request)
+- `GET https://api.local/transfer-legacy` intentionally unsafe state change via GET
+- `GET https://api.local/transfers` returns transfers for the current user and requires a custom header
+  (e.g. `X-Client-Version: 1` and/or `X-Api-Key`)
+- `GET https://api.local/account-meta` returns sensitive info in custom response headers
+- `GET https://api.local/admin/transfers` lists all transfers (requires `sid=admin`)
+- `GET https://api.local/admin/config` admin UI for runtime config
+- `POST https://api.local/admin/config` updates runtime config (requires `sid=admin`)
+
+## Attacker UI
+
+Open `https://attacker.local/` to trigger:
+- Cross-origin `fetch` to `/me`
+- Preflighted `/notes` and `/transfers` requests using custom headers
+- Sensitive header exfiltration from `/account-meta`
+- CSRF-style form POST to `/transfer`
+- Legacy GET state change via `/transfer-legacy` using both `fetch` and image load
+
+## Data Storage
+
+Transfers are stored in SQLite under the API service. Seed data is created on first run.
 
 ## Project Structure
 

@@ -1,3 +1,6 @@
+# WARNING
+# This is intentionally vulnerable and must never be used in production.
+# WARNING
 FROM python:3.12-slim
 
 WORKDIR /app
